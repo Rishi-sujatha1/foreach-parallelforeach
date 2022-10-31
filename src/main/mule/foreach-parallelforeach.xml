@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="df39ba98-0056-4524-a87f-6f21d54bb367" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="foreach-parallelforeachFlow" doc:id="abb30ae2-0df4-43e2-a985-fd52446412a8" >
+		<http:listener doc:name="Listener" doc:id="1f3efa5d-d7f8-43b3-a897-df62ed4d4be8" path="/test1" config-ref="HTTP_Listener_config"/>
+		<parallel-foreach doc:name="parallel for each" collection="#[payload]">
+		<flow-ref doc:name="Flow Reference" doc:id="0f0a1831-b1fd-40a6-b12c-045c80bda0d6" name="foreach-parallelforeachSub_Flow"/>
+		</parallel-foreach>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="629872b5-cb5e-49d9-b7c1-664230144599" type="MULE:COMPOSITE_ROUTING">
+				<logger level="ERROR" doc:name="Logger" doc:id="c468bd2e-099c-4a0e-80d7-899a86ba3ffc" message="error from parallel for each"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="foreach-parallelforeachFlow1" doc:id="0e8da341-29fe-4b27-b5d7-fd5efa048711" >
+		<http:listener doc:name="Listener" doc:id="07d48bb5-7e55-415a-a3f8-1f9e22a45923" path="/test" config-ref="HTTP_Listener_config"/>
+		<foreach doc:name="For Each" doc:id="545acb14-c0e5-4370-85f3-1d9abf65182c" >
+			<flow-ref doc:name="Flow Reference" doc:id="9204fad4-43c0-45ed-94ad-01e1c8d93bfd" name="foreach-parallelforeachSub_Flow"/>
+		</foreach>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5370112a-6637-4033-803b-12152a765682" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="504e1f3f-7357-444a-8958-123707757974" message="error from For Each"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<sub-flow name="foreach-parallelforeachSub_Flow" doc:id="1b706e49-93b3-485c-8893-8333cd54f983" >
+		<choice doc:name="Choice" doc:id="d1dfce08-ae12-4898-b70a-43225326a769" >
+			<when expression='#[payload.username == "gopi"]'>
+				<raise-error doc:name="Raise error" doc:id="0e74685a-1a55-4640-9c05-2aa100751735" type="CUSTOM:ROUTING"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="3513776d-bf30-4d65-abf4-29879b6f1503" message="#[payload]"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
